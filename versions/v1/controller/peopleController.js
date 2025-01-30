@@ -9,7 +9,7 @@ const controller = {};
 
 controller.getAllPeople = async (req, res) => {
   try {
-    const {imagename, user_name,email,mobile_number,status, order, designation } = req.query; // Extract query parameters
+    const {user_name,order,designation,type } = req.query; // Extract query parameters
     const whereClause = {};
     const sortOrder = [];
 
@@ -20,7 +20,9 @@ controller.getAllPeople = async (req, res) => {
     if (designation) {
       whereClause.designation = designation; // Filter by designation
     }
-
+    if (type) {
+      whereClause.type = type; // Filter by designation
+    }
     if (order === "A-Z" || order === "a-z") {
       sortOrder.push(["user_name", "ASC"]); // Sort ascending by name
     } else if (order === "Z-A" || order === "z-a") {
