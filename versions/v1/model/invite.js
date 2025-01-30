@@ -25,6 +25,10 @@ const User = sequelize.define('invite', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  type:{
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   invitedDate:{
     type:DataTypes.STRING,
     allowNull:false,
@@ -34,7 +38,7 @@ const User = sequelize.define('invite', {
     allowNull:false,
   },
   joinedDate:{
-    type:DataTypes.INTEGER,
+    type:DataTypes.STRING,
     allowNull: true,
   },
   channelId:{
