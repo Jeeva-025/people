@@ -16,7 +16,20 @@ const validateInvitation = () => {
 
   return schema; // Return the schema itself, not the result of schema.validate()
 };
+
+const validatePeopleInsert=()=>{
+  const schema= Joi.object({
+    user_name:Joi.string().required(),
+    email: Joi.string().email().required(),
+    mobile_number: Joi.string().required(),
+    status: Joi.string().required(),
+    designation: Joi.string().required(),
+    type:Joi.string().required(),
+  });
+  return schema;
+}
 module.exports = {
   validateChannel,
   validateInvitation,
+  validatePeopleInsert
 };
