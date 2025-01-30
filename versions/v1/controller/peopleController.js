@@ -57,10 +57,7 @@ controller.getAllPeople = async (req, res) => {
 controller.insertPeople = async (req, res) => {
   try {
     
-    upload.single('imagename')(req, res, async (err) => {
-      if (err) {
-        return res.status(400).json({ message: 'Error uploading file', error: err });
-      }
+    
       const { user_name, email, mobile_number, status, designation, type } = req.body;
 
       try {
@@ -75,8 +72,13 @@ controller.insertPeople = async (req, res) => {
         }
 
         const now = new Date();
-
-        if (data.invitedDate <= now && now <= data.expireDate) {
+        const indate = new Date(data.invitedDate);  // Ensure it's a Date object
+        const exdate = new Date(data.expireDate); 
+        const jDate= now.toISOString().split("T")[0];
+        data.joinedDate= jDate;
+        data.status= "accepted"
+        data.save()
+        if (indate <= now && now <= exdate) {
           if (!user_name || !email || !mobile_number || !status || !designation || !type) {
             return res.status(400).json({ message: 'Missing required fields' });
           }
@@ -100,7 +102,7 @@ controller.insertPeople = async (req, res) => {
         console.log("Error in finding invitation:", error);
         res.status(500).json({ message: 'Error occurred while processing invitation', error: error });
       }
-    });
+    
   } catch (err) {
     console.log("General error:", err);
     res.status(500).json({ message: 'Error occurred', error: err });
