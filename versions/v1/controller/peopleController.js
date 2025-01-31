@@ -10,7 +10,7 @@ const controller = {};
 
 controller.getAllPeople = async (req, res) => {
   try {
-    const {user_name,order,designation,type } = req.query;
+    const {user_name,order,designation,type } = req.query; 
     const whereClause = {};
     const sortOrder = [];
 
@@ -22,7 +22,7 @@ controller.getAllPeople = async (req, res) => {
       whereClause.designation = designation; 
     }
     if (type) {
-      whereClause.type = type; // Filter by designation
+      whereClause.type = type; 
     }
     if (order === "A-Z" || order === "a-z") {
       sortOrder.push(["user_name", "ASC"]); 
@@ -39,7 +39,7 @@ controller.getAllPeople = async (req, res) => {
       const usersWithImages = users.map(user => {
          user.imagename = `http://localhost:8080/uploads/${user.imagename}`;
         return {
-          ...user.dataValues,
+          ...user.dataValues, 
         };
       });
 
@@ -58,7 +58,7 @@ controller.insertPeople = async (req, res) => {
   try {
     const { user_name, email, mobile_number, status, designation, type } = req.body;
 
-    // Fetch invitation details
+   
     const data = await invite.findOne({ where: { email } });
 
     if (!data) {
@@ -66,25 +66,22 @@ controller.insertPeople = async (req, res) => {
     }
 
     const now = new Date();
-    const indate = new Date(data.invitedDate);
     const exdate = new Date(data.expireDate);
-    const jDate = now.toISOString().split("T")[0];
+    
+    if (now >= exdate) {
+      return res.status(400).json({ message: "Invitation has expired" });
+    }
 
-    // Update invite status
+    const jDate = now.toISOString().split("T")[0];
     data.joinedDate = jDate;
     data.status = "accepted";
     await data.save();
-
-    // Check if invitation is still valid
-    if (now < indate || now > exdate) {
-      return res.status(400).json({ message: "Invitation has expired" });
-    }
 
     if (!user_name || !email || !mobile_number || !status || !designation || !type) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Create new user in 'people' table
+    
     await User.create({
       imagename: req.file.filename,
       user_name,
@@ -95,14 +92,13 @@ controller.insertPeople = async (req, res) => {
       type,
     });
 
-    // Fetch invitedBy and channelId from invite table
     const invitedBy = data.invitedBy;
-    const channelId = data.channelId;
-
-    // Insert into userChannel table
+    const channelId = data.channelId; 
+   
+    const temp= await User.findOne({where:{email}})
     await userChannel.create({
       invitedBy,
-      userEmail: email, 
+      userId: temp.id, 
       channelId, 
       status: "active",
     });
