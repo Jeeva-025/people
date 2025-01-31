@@ -8,5 +8,6 @@ const inviteController = require("../controller/inviteController");
 // Route for getting all people
 router.get('/invitedPeople', inviteController.invitedPeople);
 router.post('/invite', validUmiddleware.validateBody(validation.validateInvitation()),inviteController.insertPeople);
+router.post('/delete',inviteController.delete);
 
 module.exports = router;
