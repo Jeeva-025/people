@@ -9,6 +9,6 @@ const peopleController = require('../controller/peopleController');
 
 // Route for getting all people
 router.get('/', peopleController.getAllPeople);
-router.post('/insert',validateMiddleware.validateBody(validate.validatePeopleInsert()),upload.single("imagename"),peopleController.insertPeople);
+router.post('/insert',upload.single("imagename"),validateMiddleware.validateBody(validate.validatePeopleInsert()),peopleController.insertPeople);
 
 module.exports = router;
