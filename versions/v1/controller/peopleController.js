@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const User = require("../model/people");
 const invite= require("../model/invite")
+const userChannel= require("../model/userChannel")
 const { where } = require("sequelize");
 const upload = require('../utils/storage');
 
@@ -9,24 +10,24 @@ const controller = {};
 
 controller.getAllPeople = async (req, res) => {
   try {
-    const {user_name,order,designation,type } = req.query; // Extract query parameters
+    const {user_name,order,designation,type } = req.query;
     const whereClause = {};
     const sortOrder = [];
 
     if (user_name) {
-      whereClause.user_name = user_name; // Filter by name
+      whereClause.user_name = user_name; 
     }
 
     if (designation) {
-      whereClause.designation = designation; // Filter by designation
+      whereClause.designation = designation; 
     }
     if (type) {
       whereClause.type = type; // Filter by designation
     }
     if (order === "A-Z" || order === "a-z") {
-      sortOrder.push(["user_name", "ASC"]); // Sort ascending by name
+      sortOrder.push(["user_name", "ASC"]); 
     } else if (order === "Z-A" || order === "z-a") {
-      sortOrder.push(["user_name", "DESC"]); // Sort descending by name
+      sortOrder.push(["user_name", "DESC"]); 
     }
 
     const users = await User.findAll({
@@ -36,10 +37,9 @@ controller.getAllPeople = async (req, res) => {
 
     if (users.length > 0) {
       const usersWithImages = users.map(user => {
-        // Assuming the imagename field has the correct filename and is stored in the 'uploads' directory
          user.imagename = `http://localhost:8080/uploads/${user.imagename}`;
         return {
-          ...user.dataValues, // keep all user data
+          ...user.dataValues,
         };
       });
 
@@ -56,60 +56,63 @@ controller.getAllPeople = async (req, res) => {
 
 controller.insertPeople = async (req, res) => {
   try {
-    
-    
-      const { user_name, email, mobile_number, status, designation, type } = req.body;
+    const { user_name, email, mobile_number, status, designation, type } = req.body;
 
-      try {
-        const data = await invite.findOne({
-          where: {
-            email: email 
-          }
-        });
+    // Fetch invitation details
+    const data = await invite.findOne({ where: { email } });
 
-        if (!data) {
-          return res.status(404).json({ message: 'Mail not present in invite table' });
-        }
+    if (!data) {
+      return res.status(404).json({ message: "Email not found in invite table" });
+    }
 
-        const now = new Date();
-        const indate = new Date(data.invitedDate);  // Ensure it's a Date object
-        const exdate = new Date(data.expireDate); 
-        const jDate= now.toISOString().split("T")[0];
-        data.joinedDate= jDate;
-        data.status= "accepted"
-        data.save()
-        if (indate <= now && now <= exdate) {
-          if (!user_name || !email || !mobile_number || !status || !designation || !type) {
-            return res.status(400).json({ message: 'Missing required fields' });
-          }
+    const now = new Date();
+    const indate = new Date(data.invitedDate);
+    const exdate = new Date(data.expireDate);
+    const jDate = now.toISOString().split("T")[0];
 
-          // Create new user
-          await User.create({
-            imagename: req.file.filename, 
-            user_name,
-            email,
-            mobile_number,
-            status,
-            designation,
-            type
-          });
+    // Update invite status
+    data.joinedDate = jDate;
+    data.status = "accepted";
+    await data.save();
 
-          res.status(200).json({ message: 'User created successfully!' });
-        } else {
-          res.status(400).json({ message: 'Invitation has expired' });
-        }
-      } catch (error) {
-        console.log("Error in finding invitation:", error);
-        res.status(500).json({ message: 'Error occurred while processing invitation', error: error });
-      }
-    
-  } catch (err) {
-    console.log("General error:", err);
-    res.status(500).json({ message: 'Error occurred', error: err });
+    // Check if invitation is still valid
+    if (now < indate || now > exdate) {
+      return res.status(400).json({ message: "Invitation has expired" });
+    }
+
+    if (!user_name || !email || !mobile_number || !status || !designation || !type) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Create new user in 'people' table
+    await User.create({
+      imagename: req.file.filename,
+      user_name,
+      email,
+      mobile_number,
+      status,
+      designation,
+      type,
+    });
+
+    // Fetch invitedBy and channelId from invite table
+    const invitedBy = data.invitedBy;
+    const channelId = data.channelId;
+
+    // Insert into userChannel table
+    await userChannel.create({
+      invitedBy,
+      userEmail: email, 
+      channelId, 
+      status: "active",
+    });
+
+    res.status(200).json({ message: "User created and added to user channel successfully!" });
+
+  } catch (error) {
+    console.error("Error inserting user:", error);
+    res.status(500).json({ message: "Internal server error", error });
   }
 };
-
-
-
 
 module.exports = controller;
