@@ -66,4 +66,13 @@ controller.insertPeople = async (req, res) => {
   }
 };
 
+controller.delete= async(req,res)=>{
+  const {id}= req.query;
+
+  const data= await invite.findOne({where:{id}})
+  data.status="in active"
+  data.save()
+  res.json({message:"Deleted Successfully"})
+}
+
 module.exports = controller;
