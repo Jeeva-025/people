@@ -11,7 +11,7 @@ const People = ({info,setIsPeopleOpen}) => {
     <div className='relative flex flex-col justify-center items-start space-y-5 bg-gray-900 h-screen px-4 py-3'>
         <button onClick={()=>setIsPeopleOpen(false)} className='absolute top-2 right-2 '><IoClose/></button>
         
-        <img className='w-full max-h-[150px] rounded-lg object-fill ' src={`http://localhost:8080/uploads/${info.imageName}`}/>
+        <img className='w-full max-h-[150px] rounded-lg object-fill ' src={info.imagename}/>
         <h1>{info.username}</h1>
         <p className='text-xs'>{info.designation}</p>
         <div className='flex flex-row justify-between items-center space-x-3'>
@@ -27,7 +27,7 @@ const People = ({info,setIsPeopleOpen}) => {
 
         <div className='flex flex-row space-x-3 justify-center items-center'>
         <FiPhone/>
-        <p className='text-xs'>{info.phoneNo}</p>
+        <p className='text-xs'>{info.mobile_number}</p>
         </div>
         <div className='flex flex-row space-x-3 justify-center items-center'>
             <MdOutlineEmail/>

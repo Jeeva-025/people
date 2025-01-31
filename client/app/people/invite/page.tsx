@@ -7,27 +7,37 @@ const Page = () => {
 
     const fetchInvites=useWorkfastStore((state)=> state.fetchInvites);
     const invites=useWorkfastStore((state)=>state.invites);
+    const { isInviteOpen } = useWorkfastStore();
+    const deleteInvite=useWorkfastStore((state)=>state.deleteInvite);
 
     const[view, setView]=useState(false);
     const [activeTab, setActiveTab] = useState('pending');
     const[data, setData]=useState([]);
+
+
+    const handleDelete=async(id)=>{
+        try{
+          await deleteInvite(id);
+          await fetchInvites();
+        }catch(err){
+            console.log(err);
+        }}
 
     useEffect(()=>{
     const fetchData=async()=>{
         await fetchInvites();
     }
     fetchData();
-    },[fetchInvites])
+    },[fetchInvites, isInviteOpen])
 
 
     useEffect(() => {
-        if (invites?.length > 0) {
-            setData(invites);
-        }
-    }, [invites]);
-    if(invites?.length>0){
-        console.log(data);  
+    if (invites?.length > 0) {
+        setData(invites);
     }
+    }, [invites ]);
+
+   
 
   return (
     <div className=' w-full flex flex-col space-y-2   rounded-tr-lg rounded-br-lg  bg-gray-800 min-h-screen  border border-gray-600'>
@@ -58,7 +68,7 @@ const Page = () => {
                     
                     <div className='flex flex-col space-y-3 flex-1'>
                      <p className='text-sm'>{item.email}</p>
-                     <p className='text-sm flex flex-row justify-start items-center space-x-1 text-gray-400'>Invited by <span className='text-sm ml-2 text-yellow-400'>{item.invitedById}</span></p>
+                     <p className='text-sm flex flex-row justify-start items-center space-x-1 text-gray-400'>Invited by <span className='text-sm ml-2 text-yellow-400'>{item.invitedByPerson}</span></p>
                      <p className='text-sm'>{item.type}</p>
                     </div>
 
@@ -68,7 +78,7 @@ const Page = () => {
 
                     <div className='flex-1 flex flex-row space-x-4'>
                     <button className='px-4 py-2 border border-yellow-400 rounded-md text-xs text-center bg-transparent'>Resend Invitation</button>
-                    <button className='px-4 py-2 border border-red-500 rounded-md text-xs text-center bg-transparent'>Revoke</button>
+                    <button onClick={()=>handleDelete(item.id)} className='px-4 py-2 border border-red-500 rounded-md text-xs text-center bg-transparent'>Revoke</button>
                     </div>
                 </div>)
 ))}
@@ -89,14 +99,14 @@ const Page = () => {
                      item.status==='accept' && ( <div key={index} className='flex flex-row justify-between items-center  py-8 bg-gray-700 border border-transparent rounded-lg px-4'>
                         <div className='flex flex-col space-y-3'>
                          <p className='text-sm'>{item.email}</p>
-                         <p className='text-sm flex flex-row justify-start items-center space-x-1 text-gray-400'>Invited by <span className='text-sm ml-2 text-yellow-400'>{item.invitedBy}</span></p>
+                         <p className='text-sm flex flex-row justify-start items-center space-x-1 text-gray-400'>Invited by <span className='text-sm ml-2 text-yellow-400'>{item.invitedByPerson}</span></p>
                          <p className='text-sm'>{item.type}</p>
                         </div>
                         <div className='flex flex-col justify-center items-center'>
-                        <p className='text-sm'>Joined {item.invitedDate}</p>
+                        <p className='text-sm'>Invited on {item.invitedDate}</p>
                         </div>
                         <div className='flex flex-row items-center justify-center'>
-                        <p className='text-sm'>Joined {item.invitedDate}</p>
+                        <p className='text-sm'>Joined {item.joinedDate}</p>
                         </div>
                     </div>)
                 ))}

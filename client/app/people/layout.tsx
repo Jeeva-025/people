@@ -7,12 +7,15 @@ import { useState } from 'react';
 import Invite from "../../components/Invite.js";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import useWorkfastStore from "../../store.js";
 
 
 const layout = ({children}) => {
+    
 
+  const { isInviteOpen, setIsInviteOpen } = useWorkfastStore();
  
-  const[isInviteOpen, setIsInviteOpen]=useState(false);
+  
   const pathname = usePathname();
   console.log(pathname);
 
@@ -54,7 +57,7 @@ const layout = ({children}) => {
 
      {isInviteOpen && ( 
       <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-        <Invite  setIsInviteOpen={setIsInviteOpen} />
+        <Invite  />
       </div>
      )}
     </>

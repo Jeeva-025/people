@@ -10,22 +10,30 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css"; 
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
+import useWorkfastStore from "../store.js";
 
 
 
 
 
-const Invite = ({setIsInviteOpen}) => {
+const Invite = () => {
+
+
+   const addInvites=useWorkfastStore((state)=> state.addInvites);
+   const fetchInvites=useWorkfastStore((state)=>state.fetchInvites);
+   const { setIsInviteOpen } = useWorkfastStore();
+
     const[data, setData]=useState({
-        email:[], 
-        inviteType:"",
-        date:"",
-        channels:[]    
+        email:"", 
+        type:"",
+        invitedBy:3,
+        channelId:"",
+        expiryDate:null,
     })
     const [selectedChannel, setSelectedChannel] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
-    const[day, setDay]=useState(null);
-  const [nonSelectedChannel, setNonSelectedChannel] = useState([
+    const[daysPicker, setDaysPicker]=useState(null)
+    const [nonSelectedChannel, setNonSelectedChannel] = useState([
     "Town Hall",
     "Feedback",
     "Food Complaints",
@@ -43,7 +51,25 @@ const Invite = ({setIsInviteOpen}) => {
     "CEO"
   ]);
 
-    const[toggle, SetToggle]=useState({inviteType:false, date:false})
+  const channels = [
+    "Town Hall",
+    "Feedback",
+    "Food Complaints",
+    "Design Team",
+    "Developers",
+    "Design brainstorming",
+    "Marketing",
+    "Product Market-fit",
+    "Server",
+    "Managers",
+    "Test",
+    "R&D",
+    "Data Base",
+    "Office",
+    "CEO",
+  ];
+
+    const[toggle, SetToggle]=useState({type:false, date:false})
     const [isChannelClose, setIsChannelClose]=useState(true);
     const [isGuestOrCustomer, setIsGuestOrCustomer]=useState(false)
     const[isShowDatePicker, setIsShowDatePicker]=useState(false);
@@ -56,32 +82,111 @@ const Invite = ({setIsInviteOpen}) => {
     const handleToggle=(type)=>{
         SetToggle((prev) => ({ ...prev, [type]: !prev[type] }));
     }
+
+
+    const formatDate = (days) => {
+      let  today = new Date();
+      if(isShowDatePicker){
+        today=new Date(days);
+      }else{
+        today.setDate(today.getDate() + days);
+        setDaysPicker(today);
+      }
+      
+      
+
+      const getDaySuffix = (day) => {
+        if (day >= 11 && day <= 13) return "th"; 
+        const lastDigit = day % 10;
+        switch (lastDigit) {
+          case 1:
+            return "st";
+          case 2:
+            return "nd";
+          case 3:
+            return "rd";
+          default:
+            return "th";
+        }
+      };
+     
+      const day = today.getDate();
+      const month =today.toLocaleDateString("en-US", {month:"long"});
+      const year = today.getFullYear(); 
+
+      const suffix=getDaySuffix(day)
+      const options={year:"numeric", month:"long", day:"numeric"};
+      const formattedDate = new Date(date).toLocaleDateString("en-US", options);
+     
+      
+      console.log(`${month} ${day}${suffix}, ${year}`)
+      
+      return `${month} ${day}${suffix}, ${year}`;
+    };
     
     const handleSelectionChange = (item) => {
+      const itemIndex = channels.indexOf(item) + 1;
         if (selectedChannel.includes(item)) {
-          // Remove from selectedChannel and add back to nonSelectedChannel
+          
           setSelectedChannel((prev) => prev.filter((channel) => channel !== item));
           setNonSelectedChannel((prev) => [...prev, item]);
+          setData((prev) => {
+            const updatedChannelIds = prev.channelId
+              .split(",") 
+              .filter((id) => id !== String(itemIndex)) 
+              .join(","); 
+            return { ...prev, channelId: updatedChannelIds };
+          });
         } else {
-          // Add to selectedChannel and remove from nonSelectedChannel
           setSelectedChannel((prev) => [...prev, item]);
           setNonSelectedChannel((prev) => prev.filter((channel) => channel !== item));
+          setData((prev) => {
+      const updatedChannelIds = [...prev.channelId.split(",").filter(Boolean), itemIndex]
+        .sort((a, b) => a - b) 
+        .join(","); 
+      return { ...prev, channelId: updatedChannelIds };
+    });
         }
       };
 
-      const handleChannel=(e)=>{
-        console.log(e);
-        const newIsChannelClose = !(data.inviteType === "Guest" || data.inviteType === "Customer");
-        setIsChannelClose(newIsChannelClose);
-      
-        // Use the updated value directly
-        setIsGuestOrCustomer(!newIsChannelClose);
+      const validate=()=>{
+         if(!data.email || !data.type){
+          alert("Email and InviteType is required")
+          return false;
+         }
+         return true;
       }
+
+      const handleChannel=async(e)=>{
+        const name=e.target.textContent;
+        console.log(name);
+        if(name==='Invite'){
+          if(validate()){
+            try{
+              await addInvites(data);
+              setData({
+                email:"",
+                type:"",
+                channelId:"",
+                expiryDate:null
+              })
+              setIsInviteOpen(false);
+              await fetchInvites();
+            }catch(err){
+              alert(err);
+            }
+          }
+          return
+        }
+        const newIsChannelClose = !(data.type === "Guest" || data.type === "Customer");
+        setIsChannelClose(newIsChannelClose);
+        setIsGuestOrCustomer(!newIsChannelClose);
+}
 
       const handleInviteType=(item)=>{
         setData((prev) => ({
           ...prev,
-          inviteType: prev.inviteType === item ? "" : item,
+          type: prev.type === item ? "" : item,
         }))
       const status=!(item==='Admin'|| item==='Member')
       if(!status){
@@ -106,22 +211,32 @@ const Invite = ({setIsInviteOpen}) => {
       } 
       }
 
-      const handleDate=(item)=>{
-        setData((prev)=>({...prev, date:item}))
-        if(item==="custom"){
+      const handleDate = (item) => {
+        if (item === "custom") { 
           setIsShowDatePicker(true);
-        }
-        }
+        } else {
+          const days = parseInt(item.split(" ")[0], 10); 
+          const formattedDate = formatDate(days);
+          setData((prev) => ({ ...prev, expiryDate: formattedDate }));
+          setIsShowDatePicker(false); 
+      };
+    }
 
-        const handleCustomeDate=(item)=>{
-          setData((prev)=>({...prev, date:item}))
-          setIsShowDatePicker(false);
-          handleToggle('date');
-        }
+
+      const handleCustomDate=(date)=>{
+        setDaysPicker(date);
+        const formattedDate=formatDate(date);
+        setData((prev) => ({ ...prev, expiryDate: formattedDate })); 
+        setIsShowDatePicker(false);
+      }
+
+        
       
         
      const filteredNonSelectedChannel=nonSelectedChannel ? nonSelectedChannel.filter(data=>
         data.toLowerCase().includes(searchQuery.toLowerCase())):[];
+
+        console.log(data);
 
   return (
     <div className='bg-gray-800 flex flex-col justify-start items-start space-y-3 py-8 px-4 border border-gray-600 rounded-lg h-screen min-w-md w-[450px] overflow-y-scroll scrollbar-custom'>
@@ -134,20 +249,20 @@ const Invite = ({setIsInviteOpen}) => {
 
         <div className='flex flex-col space-2 w-full'>
             <label  className='text-xs'>To:</label>
-            <input  className='text-start px-2 text-xs w-full border h-[79px]  border-gray-600 text-gray-400 bg-gray-800 rounded-md' placeholder='name@pepul.com'/>
+            <input value={data.email} onChange={(e)=>setData((prev)=>({...prev, email:e.target.value}))}  className='text-start px-2 text-xs w-full border h-[79px]  border-gray-600 text-gray-400 bg-gray-800 rounded-md' placeholder='name@pepul.com'/>
         </div>
 
         <div className='relative w-full '>
             <label className='text-xs'>Invite as</label>
 
-            <div onClick={()=>handleToggle('inviteType')} className={`flex flex-row w-full justify-between items-center px-2 py-1 border border-gray-600 rounded-md ${toggle.inviteType ? 'rounded-bl-none rounded-br-none': 'rounded-md'}`}>
+            <div onClick={()=>handleToggle('type')} className={`flex flex-row w-full justify-between items-center px-2 py-1 border border-gray-600 rounded-md ${toggle.inviteType ? 'rounded-bl-none rounded-br-none': 'rounded-md'}`}>
             <div  className="text-xs ">
-            {data.inviteType && typeof data.inviteType === 'string' ? data.inviteType : "Select Type"}
+            {data.type && typeof data.type === 'string' ? data.type : "Select Type"}
             </div>
             <MdKeyboardArrowDown size={24}/>
             </div>
 
-            {toggle.inviteType &&(
+            {toggle.type &&(
                 <div className='border border-gray-500 rounded-bl-md rounded-br-md '>
                     {type.map((item, index)=>(
                     <div onClick={()=>handleInviteType(item)} key={index} className='flex flex-row justify-start items-center space-x-2  text-xs  px-4 py-2 cursor-pointer '>
@@ -170,7 +285,7 @@ const Invite = ({setIsInviteOpen}) => {
 
             <div onClick={()=>handleToggle('date')} className={`flex flex-row w-full justify-between items-center px-2 py-1 border border-gray-600 rounded-md ${toggle.date ? 'rounded-bl-none rounded-br-none': 'rounded-md'}`}>
             <div  className="text-xs " >
-            {data.date && typeof data.date === 'string' ? data.date : "Select Date"}
+            {data.expiryDate && typeof data.expiryDate === 'string' ? data.expiryDate : "Select Date"}
             </div>
             <MdKeyboardArrowDown size={24}/>
             </div>
@@ -214,7 +329,7 @@ const Invite = ({setIsInviteOpen}) => {
            <button 
             onClick={(e) => handleChannel(e)} 
             className=' w-full border border-yellow-400 rounded-md text-center py-1 bg-amber-500 text-black text-sm'>
-            {(isGuestOrCustomer || data.inviteType === 'Member' || data.inviteType == 'Admin') ? "Invite" : "Next"}
+            {(isGuestOrCustomer || data.type === 'Member' || data.type == 'Admin') ? "Invite" : "Next"}
             </button>
             </div>
         
@@ -255,13 +370,14 @@ const Invite = ({setIsInviteOpen}) => {
     >
       <DatePicker
       className=" h-[40px] border bg-gray-800 text-white rounded-2xl hover:bg-blue-400 hover:rounded-xl focus:ring-2 focus:ring-indigo-400 "
-        selected={day} // Controlled selected date
-        onChange={(date) => setDay(date)}
-        inline // Show calendar inline
-  calendarClassName="custom-datepicker" // Custom class for date picker (for global styles)
-  popperPlacement="bottom-start" // Position the calendar at the bottom-left of the input
-  renderCustomHeader={({ monthDate, decreaseMonth, increaseMonth }) => (
-    <div className="flex flex-col py-1 w-full">
+      selected={daysPicker} 
+      onChange={handleCustomDate}
+      inline // Show calendar inline
+      minDate={new Date(new Date().setDate(new Date().getDate() +1))}
+      calendarClassName="custom-datepicker" 
+      popperPlacement="bottom-start" 
+      renderCustomHeader={({ monthDate, decreaseMonth, increaseMonth }) => (
+      <div className="flex flex-col py-1 w-full">
       {/* Month/Year Navigation */}
       <div className="flex py-1 justify-between items-center">
         <span className="text-white font-semibold text-sm">
@@ -289,4 +405,4 @@ const Invite = ({setIsInviteOpen}) => {
   )
 }
 
-export default Invite
+export default Invite;
