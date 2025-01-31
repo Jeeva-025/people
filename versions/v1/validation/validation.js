@@ -7,14 +7,17 @@ const validateChannel = () => {
   return schema
 }
 
+
 const validateInvitation = () => {
   const schema = Joi.object({
     email: Joi.string().email().required(),
     invitedBy: Joi.string().required(),
-    status: Joi.string().valid('accepted', 'not accepted', 'rejected').required(),
+    status: Joi.string().valid("accepted", "not accepted", "rejected").required(),
+    channels: Joi.array().items(Joi.string()).required(), // Ensure 'channels' is an array of strings
+    type: Joi.string().required(), // Add 'type' field validation
   });
 
-  return schema; // Return the schema itself, not the result of schema.validate()
+  return schema; // Validate and return result
 };
 
 const validatePeopleInsert=()=>{
