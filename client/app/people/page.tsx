@@ -36,8 +36,7 @@ const handleToggle=(type)=>{
 
 useEffect(()=>{
  const fetchData=async()=>{
-  await fetchPeoples("");
- 
+  // await fetchPeoples("");
  }
  fetchData();
 },[fetchPeoples])
@@ -72,7 +71,7 @@ const fetchDataByQuery=async()=>{
 
 useEffect(() => {
   
-    fetchDataByQuery(); // Trigger the fetch only when account or recommend is updated
+    // fetchDataByQuery(); // Trigger the fetch only when account or recommend is updated
   
 }, [data.account, data.recommend, data.org]);
 
@@ -80,8 +79,8 @@ useEffect(() => {
     <>
   {/* max-w-[1090px] */}
         <div className=' flex flex-col space-y-2  rounded-tr-lg rounded-br-lg  bg-gray-800 min-h-screen border border-gray-600 '>
-          <div className=' relative flex-1 min-w-fit '>
-        <div className='  fixed top-1 w-full max-w-[1059px] border-t border-gray-600 border-r rounded-tr-md z-10 bg-gray-800'>
+          <div className=' relative flex-1 w-full'>
+        <div className='  absolute  w-full   border-t border-gray-600 border-r rounded-tr-md z-10 bg-gray-800'>
           <div className='flex flex-row justify-between items-center pt-2 px-6'>
           <h1 className='text-md'>All People</h1>
           <button className='text-md px-2 py-1 border border-gray-600 rounded-md text-gray-400 '>Invite People</button>
@@ -105,7 +104,7 @@ useEffect(() => {
                           </div>
               
                           {toggle.account &&(
-                              <div className='absolute bg-gray-800 border border-gray-500 rounded-bl-md rounded-br-md '>
+                              <div className='absolute w-36 bg-gray-800 border border-gray-500 rounded-bl-md rounded-br-md '>
                                   {account.map((item, index)=>(
                                   <div onClick={()=>setData((prev) => ({
                                       ...prev,
@@ -153,7 +152,7 @@ useEffect(() => {
                           </div>
               
                           {toggle.recommend &&(
-                              <div className='absolute bg-gray-800 border border-gray-500 rounded-bl-md rounded-br-md '>
+                              <div className='absolute w-36 bg-gray-800 border border-gray-500 rounded-bl-md rounded-br-md '>
                                   {recommend.map((item, index)=>(
                                   <div onClick={()=>setData((prev) => ({
                                       ...prev,

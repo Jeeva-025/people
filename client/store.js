@@ -6,7 +6,9 @@ const workfastStore=(set)=>({
    peoples:[],
    invites:[],
    isInviteOpen: false,
+   teams:[],
 
+   addTeams:(value)=> set((state)=>({teams:[...state.teams, value]})),
    setIsInviteOpen: (value) => set({ isInviteOpen: value }),
 
    fetchPeoples: async(str)=>{

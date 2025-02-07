@@ -17,15 +17,15 @@ const Page = () => {
 
     const handleDelete=async(id)=>{
         try{
-          await deleteInvite(id);
-          await fetchInvites();
+        //   await deleteInvite(id);
+        //   await fetchInvites();
         }catch(err){
             console.log(err);
         }}
 
     useEffect(()=>{
     const fetchData=async()=>{
-        await fetchInvites();
+        // await fetchInvites();
     }
     fetchData();
     },[fetchInvites, isInviteOpen])
@@ -42,7 +42,7 @@ const Page = () => {
   return (
     <div className=' w-full flex flex-col space-y-2   rounded-tr-lg rounded-br-lg  bg-gray-800 min-h-screen  border border-gray-600'>
          <div className=' relative flex-1 min-w-fit '>
-         <div className='  fixed top-1 w-full max-w-[1059px] border-t border-gray-600 border-r rounded-tr-md z-10 bg-gray-800'>
+         <div className='  absolute top-1 border-t border-gray-600 border-r rounded-tr-md z-10 bg-gray-800 w-full'>
         <h1 className='pl-2'>Invited People</h1>
 
        <div className='  flex flex-row border-t border-gray-600 py-2 px-4 space-x-5 border-b '> 
