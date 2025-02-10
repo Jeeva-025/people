@@ -6,13 +6,19 @@ import { IoSearch } from 'react-icons/io5';
 import { IoEllipsisVertical, IoCheckmarkCircleOutline } from 'react-icons/io5';
 import { IoTrashOutline } from "react-icons/io5";
 import { FaCheck } from "react-icons/fa6";
+import useWorkfastStore  from "../store.js"
 
-const EditTeam = ({ setIsSelectTeamPopupOpen, members, setMembers }) => {
+const EditTeam = ({ setIsSelectTeamPopupOpen,  teamId}) => {
+  console.log(teamId);
   const [isDeletePopOpen, setIsDeletePopOpen] = useState(false);
   const [isDeleteAllPopOpen, setIsDeleteAllPopOpen] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedId, setSelectedId] = useState([]);
+  const teamMates=useWorkfastStore((state)=>state.teamMates);
+  const peoples=useWorkfastStore((state)=>state.peoples)
+  const fetchByTeamNames=useWorkfastStore((state)=> state.fetchByTeamNames)
   
-      const [selectedId, setSelectedId] = useState([]);
+  const deleteUserFromTeam=useWorkfastStore((state)=>state.deleteUserFromTeam);
 
   const [contextMenu, setContextMenu] = useState({
     visible: false,
@@ -21,7 +27,7 @@ const EditTeam = ({ setIsSelectTeamPopupOpen, members, setMembers }) => {
     memberId: null,
     name: ""
   });
-
+  
   const menuRef = useRef(null);
   const deletePopRef = useRef(null); 
   const selection =  useRef(null);
@@ -34,15 +40,31 @@ const EditTeam = ({ setIsSelectTeamPopupOpen, members, setMembers }) => {
       visible: true,
       x: rect.right + 15,
       y: rect.top + rect.height / 2-40 ,
-      memberId: member.id,
-      name: member.name
+      memberId: member.user_id,
+      name: member.user_name
     });
   };
 
-  const handleRemove = (id) => {
-    console.log(`Removing member with id: ${id}`);
-    setIsDeletePopOpen(true);
+  const handleRemove = async(id) => {
+    const arr=[id];
+    try{
+     await deleteUserFromTeam(arr, teamId);
+     await fetchByTeamNames(teamId);
+     setIsDeletePopOpen(false);
+    }catch(err){
+      console.log(err);
+    }
   };
+
+  const handleRemoveAll=async()=>{
+    try{
+    await deleteUserFromTeam(selectedId, teamId);
+    await fetchByTeamNames(teamId);
+    setIsDeleteAllPopOpen(false)
+    }catch(err){
+      console.log(err);
+    }
+  }
 
   const handleSelect = (id) => {
     console.log(`Selecting member with id: ${id}`);
@@ -89,8 +111,7 @@ const EditTeam = ({ setIsSelectTeamPopupOpen, members, setMembers }) => {
 
       if(!isDeleteAllPopOpen && selectionMode && selection.current && !selection.current.contains(event.target)){ 
       setSelectionMode(false)
-      setSelectedId([]);
-      handelCheck(false);
+      setSelectedId([]);      
       }
     };
 
@@ -101,29 +122,33 @@ const EditTeam = ({ setIsSelectTeamPopupOpen, members, setMembers }) => {
   }, [contextMenu, isDeletePopOpen, selectionMode, isDeleteAllPopOpen]);
 
 
+  useEffect(()=>{
+    const fetchData=async()=>{
+      try{
+      await fetchByTeamNames(teamId);
+      }catch(err){
+        console.log(err);
+      }
+    }
+    fetchData();
+  },[fetchByTeamNames])
+
+
   const handleChange = (id) => {
-    setMembers(members.map((item) => 
-      item.id === id ? { ...item, checked: !item.checked } : item
-    ));
     if (selectedId.indexOf(id)!=-1) {  
       setSelectedId((prev) => prev.filter(item => item !== id));
     } else {
       setSelectedId((prev) => [...prev, id]);
     }
   };
+
   const handelSelectAll=()=>{
-    handelCheck(true);
     setSelectedId((prev) => {
-      const allIds = members.map((member) => member.id); // Get all member ids
+      const allIds = peoples.map((member) => member.user_id); // Get all member ids
       return [...new Set([...prev, ...allIds])]; // Flatten the ids and add them to selectedId
     });
   }
-
-  const handelCheck=(status)=>{
-    setMembers((prev) => prev.map((member) => ({ ...member, checked: status })));
-  }
-
-
+  
 
   const contextMenuStyle = {
     position: 'fixed',
@@ -131,6 +156,7 @@ const EditTeam = ({ setIsSelectTeamPopupOpen, members, setMembers }) => {
     left: contextMenu.x,
   };
 
+  
   return (
     <div className="bg-[#121825] flex flex-col justify-start items-start space-y-3 py-4 border border-gray-600 rounded-lg min-w-md w-[450px] max-h-[80vh] overflow-y-auto scrollbar-custom">
       <div className="flex flex-col space-y-2 items-start justify-center w-full">
@@ -172,24 +198,26 @@ const EditTeam = ({ setIsSelectTeamPopupOpen, members, setMembers }) => {
               </button>
             </div>
           )}
-          {members.map((user) => (
-            <div key={user.id} className={`${user.checked? "bg-[#292C22]  ":""}`}>
+          {teamMates && peoples && peoples.map((user) => (
+           teamMates.indexOf(user.user_id)!=-1 && <div key={user.user_id} className={`${selectedId.includes(user.user_id) ? "bg-[#292C22]  ":""}`}>
               <div className="flex justify-between w-full px-2 py-1">
               <div onClick={()=>setSelectionMode(true)} className="flex space-x-2 items-center">
                   {selectionMode && ( 
-                    <div  onClick={()=>handleChange(user.id)} className={`  w-4 h-4 flex items-center justify-center rounded-full border border-[#4C566B] shadow-md ${selectedId.includes(user.id)?"bg-[#FFDD09]" : ""}`}>
-                    {selectedId.includes(user.id) &&<FaCheck size={5} className="text-black" />}
-                    </div>)}
-                <img className="w-6 h-6 rounded-md object-cover" src={user.img} alt={user.name} />
+                    <div onClick={()=>handleChange(user.user_id)} className={`w-4 h-4 flex items-center justify-center rounded-full border border-[#4C566B] shadow-md ${selectedId.includes(user.user_id)?"bg-[#FFDD09]" : ""}`}>
+                    {selectedId.includes(user.user_id) &&<FaCheck size={5} className="text-black" />}
+                    </div>)}  
+                <img className="w-6 h-6 rounded-md object-cover" src={user.imagename} alt={user.user_name} />
                 <div className="flex flex-col space-y-1 justify-start">
-                  <p className="text-[10px]">{user.name}</p>
+                  <p className="text-[10px]">{user.user_name}</p>
                   <p className={`text-[10px] rounded-sm px-1 ${getRoleColor(user.type)}`}>{user.type}</p>
                 </div>
               </div>
               <div>
 
                 {!selectionMode && <IoEllipsisVertical
-                  onClick={(event) => handleMenuClick(event, user)}
+                  onClick={(event) =>{ handleMenuClick(event, user);
+                  
+                }}
                   className="cursor-pointer"
                 />}
               </div>
@@ -216,7 +244,7 @@ const EditTeam = ({ setIsSelectTeamPopupOpen, members, setMembers }) => {
 
                 <div
                   className="flex items-center justify-between px-2 cursor-pointer"
-                  onClick={() => handleRemove(contextMenu.memberId)}
+                  onClick={() => setIsDeletePopOpen(true)}
                 >
                   <p className='text-xs text-[#FF2D55]'>Remove</p>
                   <IoTrashOutline className="text-[#FF2D55]" />
@@ -238,7 +266,7 @@ const EditTeam = ({ setIsSelectTeamPopupOpen, members, setMembers }) => {
             <p className='text-[13px] font-thin text-center'>Are you sure want to remove the Member</p>
             <div className='flex justify-between items-center border-t border-[#3D3F46] w-full'>
               <button className='flex-1 text-[#0A84FF] text-xs py-2' onClick={() => setIsDeletePopOpen(false)}>Cancel</button>
-              <button className='py-2 flex-1 text-[#FF3B30] text-xs border-l border-[#3D3F46]'>Remove</button>
+              <button onClick={()=> handleRemove(contextMenu.memberId)} className='py-2 flex-1 text-[#FF3B30] text-xs border-l border-[#3D3F46]'>Remove</button>
             </div>
           </div>
         </div>
@@ -255,7 +283,7 @@ const EditTeam = ({ setIsSelectTeamPopupOpen, members, setMembers }) => {
             <p className='text-[13px] font-thin text-center'>Once removed, the team will no longer exist.</p>
             <div className='flex justify-between items-center border-t border-[#3D3F46] w-full'>
               <button className='flex-1 text-[#0A84FF] text-xs py-2' onClick={() => setIsDeleteAllPopOpen(false)}>Cancel</button>
-              <button className='py-2 flex-1 text-[#FF3B30] text-xs border-l border-[#3D3F46]'>Remove All</button>
+              <button onClick={()=> handleRemoveAll()} className='py-2 flex-1 text-[#FF3B30] text-xs border-l border-[#3D3F46]'>Remove All</button>
             </div>
           </div>
         </div>

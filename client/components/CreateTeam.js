@@ -30,10 +30,11 @@ const CreateTeam = ({setIsCreatePeopleOpen}) => {
     const [iconColor, setIconColor]=useState("#2FD15B");
     const [isSwitchOn, setIsSwitchOn] = useState(false);
     const addTeams=useWorkfastStore((state)=>state.addTeams)
+    const fetchTeams=useWorkfastStore((state)=>state.fetchTeams);
+    const peoples=useWorkfastStore((state)=>state.peoples)
     const teams=useWorkfastStore((state)=> state.teams);
     const[data, setData]=useState({
-        IconName:Icon,
-        teamName:""
+        team_name:"",
     })
 
 
@@ -60,17 +61,17 @@ const CreateTeam = ({setIsCreatePeopleOpen}) => {
     
 
 
-    const [members, setMembers] = useState([
-        { id:1, name: "Mac", img: "https://plus.unsplash.com/premium_photo-1689530775582-83b8abdb5020?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Admin", checked:false },
-        { id:2, name: "David", img: "https://images.unsplash.com/photo-1463453091185-61582044d556?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Guest", checked:false },
-        { id:3, name: "Meju", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Workspace Owner", checked:false },
-        { id:4, name: "Jerando", img: "https://images.unsplash.com/photo-1479936343636-73cdc5aae0c3?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Customer", checked:false },
-        { id:5, name: "Leslie A...", img: "https://images.unsplash.com/photo-1491349174775-aaafddd81942?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Customer", checked:false },
-        { id:6, name: "Kristin...", img: "https://plus.unsplash.com/premium_photo-1669688174637-92ff26cc0a9b?q=80&w=1364&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Customer", checked:false },
-        { id:7, name: "Dane", img: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Member", checked:false },
-        { id:8, name: "Sandra", img: "https://plus.unsplash.com/premium_photo-1669879825881-6d4e4bde67d5?q=80&w=1372&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Customer", checked:false },
-        { id:9, name: "Duke", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1364&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Customer", checked:false },
-      ]);
+    // const [members, setMembers] = useState([
+    //     { id:1, name: "Mac", img: "https://plus.unsplash.com/premium_photo-1689530775582-83b8abdb5020?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Admin", checked:false },
+    //     { id:2, name: "David", img: "https://images.unsplash.com/photo-1463453091185-61582044d556?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Guest", checked:false },
+    //     { id:3, name: "Meju", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Workspace Owner", checked:false },
+    //     { id:4, name: "Jerando", img: "https://images.unsplash.com/photo-1479936343636-73cdc5aae0c3?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Customer", checked:false },
+    //     { id:5, name: "Leslie A...", img: "https://images.unsplash.com/photo-1491349174775-aaafddd81942?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Customer", checked:false },
+    //     { id:6, name: "Kristin...", img: "https://plus.unsplash.com/premium_photo-1669688174637-92ff26cc0a9b?q=80&w=1364&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Customer", checked:false },
+    //     { id:7, name: "Dane", img: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Member", checked:false },
+    //     { id:8, name: "Sandra", img: "https://plus.unsplash.com/premium_photo-1669879825881-6d4e4bde67d5?q=80&w=1372&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Customer", checked:false },
+    //     { id:9, name: "Duke", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1364&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Customer", checked:false },
+    //   ]);
   
 
       const getRoleColor = (role) => {
@@ -90,16 +91,16 @@ const CreateTeam = ({setIsCreatePeopleOpen}) => {
         }
       };
 
+
+    
       const handleChange = (id) => {
-        setMembers(members.map((item) => 
-          item.id === id ? { ...item, checked: !item.checked } : item
-        ));
+       
       
-        const selectedMember = members.find(item => item.id === id);
+        const selectedMember = peoples.find(item => item.user_id === id);
         
         if (selectedId.indexOf(id)!=-1) {  
           setSelectedId((prev) => prev.filter(item => item !== id));
-          setSelectedMembers(selectedMembers.filter(item => item.id !== id));
+          setSelectedMembers(selectedMembers.filter(item => item.user_id !== id));
         } else {
           setSelectedId((prev) => [...prev, id]);
           setSelectedMembers((prev) => [...prev, selectedMember]);
@@ -109,45 +110,55 @@ const CreateTeam = ({setIsCreatePeopleOpen}) => {
       const handleToggle = () => {
         setIsSwitchOn((prev) => {
             const newState = !prev;
-    
-            // Update members based on newState
-            const updatedMembers = members.map(member => ({
-                ...member,
-                checked: newState
-            }));
-    
+           // Update members based on newState
             if (newState) {
                 // If switched ON, select all members and their IDs
-                setSelectedMembers(updatedMembers);
-                setSelectedId(updatedMembers.map(member => member.id));
+                setSelectedMembers(peoples);
+                setSelectedId(peoples.map(member => member.user_id));
             } else {
                 // If switched OFF, clear selected lists
                 setSelectedMembers([]);
                 setSelectedId([]);
             }
-    
-            setMembers(updatedMembers); // Update members list with checked state
-    
+             // Update members list with checked state
             return newState;
         });
     };
 
 
     const validate=()=>{
-        if(!data.teamName){
+        if(!data.team_name){
             alert("All Fields are required")
+            return false;
+        }
+        if(selectedId.length===0){
+            alert("Select Members");
             return false;
         }
         return true;
     }
 
-    const handleCreateTeam=()=>{
-        if(validate()){
-            addTeams(data);
-            setIsCreatePeopleOpen(false);
-        }
-         
+    const handleCreateTeam=async()=>{
+        if (validate()) {
+            try {
+                await addTeams(data.team_name, selectedId);
+                await fetchTeams();
+                setIsCreatePeopleOpen(false);
+            } catch (error) {
+                console.error("Error while creating team:", error);
+            }
+        }    
     }
+
+    if(peoples){
+        console.log(peoples);
+    }
+    if(selectedId.length>0){
+    console.log(selectedId);
+    
+    }
+
+    console.log(data.team_name);
 
   return (
     
@@ -201,7 +212,7 @@ const CreateTeam = ({setIsCreatePeopleOpen}) => {
             <div className="w-6 h-6 flex items-center justify-center rounded-md px-1 bg-[#0A4F26] text-[#31D843]"><FaPeopleGroup size={40}/></div>
             <p className='text-xs'>Team Name</p>   
             </div>
-            <input value={data.teamName} onChange={(e)=>setData((prev)=>({...prev, teamName:e.target.value}))} className='bg-gray-800 text-xs px-2 py-2 border border-gray-600 rounded-md w-full' type="text" placeholder="Enter team name (e.g, AI Enthusiast)" />
+            <input value={data.team_name} onChange={(e)=>setData((prev)=>({...prev, team_name:e.target.value}))} className='bg-gray-800 text-xs px-2 py-2 border border-gray-600 rounded-md w-full' type="text" placeholder="Enter team name (e.g, AI Enthusiast)" />
         </div>}
 
         <div className='w-full flex flex-col justify-center items-start space-y-2'>
@@ -219,18 +230,18 @@ const CreateTeam = ({setIsCreatePeopleOpen}) => {
             </div>
            
             <div className="flex gap-3 bg-transparent ">
-                {members.map((user, index) => (
-                    <div key={index} onClick={()=>handleChange(user.id)} className=" cursor-pointer relative flex flex-col items-center">
+                {peoples && peoples.map((user, index) => (
+                    <div key={index} onClick={()=>handleChange(user.user_id)} className=" cursor-pointer relative flex flex-col items-center">
                     {/* Profile Image */}
                     <div className="w-6 h-6 rounded-md relative">
                         <img
-                        src={user.img}
-                        alt={user.name}
+                        src={user.imagename}
+                        alt={user.user_name}
                         className="w-full h-full object-cover rounded-md"
                         />
                         {/* Plus Icon */}
-                        <div className={`absolute -top-1.5 -right-1.5  w-3 h-3 flex items-center justify-center rounded-full border border-[#0D1117] shadow-md ${selectedId.includes(user.id)?"bg-green-500" : "bg-yellow-400"}`}>
-                        {selectedId.includes(user.id) ? (
+                        <div className={`absolute -top-1.5 -right-1.5  w-3 h-3 flex items-center justify-center rounded-full border border-[#0D1117] shadow-md ${selectedId.includes(user.user_id)?"bg-green-500" : "bg-yellow-400"}`}>
+                        {selectedId.includes(user.user_id) ? (
                             <FaCheck size={5} className="text-white" />
                             ) : (
                             <FaPlus size={5} className="text-black" />
@@ -238,7 +249,7 @@ const CreateTeam = ({setIsCreatePeopleOpen}) => {
                         </div>
                     </div>
                     {/* Name */}
-                    <span className="text-white text-[10px] mt-1">{user.name}</span>
+                    <span className="text-white text-[10px] mt-1">{user.user_name}</span>
                     </div>
                 ))}
             </div>
@@ -263,16 +274,16 @@ const CreateTeam = ({setIsCreatePeopleOpen}) => {
             <div className='flex flex-col justify-start space-y-2 w-full'>
                 <h1 className='text-[15px]'>All Members</h1>
                 <div className='flex flex-col justify-start items-start space-y-2 w-full'>
-                    {members.map((user)=>(
-                        <div key={user.id} className='flex justify-between w-full'>
+                    {peoples && peoples.map((user)=>(
+                        <div key={user.user_id} className='flex justify-between w-full'>
                             <div className='flex space-x-2'>
-                                <img className="w-6 h-6 rounded-md object-cover" src={user.img}/>
+                                <img className="w-6 h-6 rounded-md object-cover" src={user.imagename}/>
                                 <div className='flex flex-col space-y-1 justify-start'>
-                                    <p className='text-[10px]'>{user.name}</p>
+                                    <p className='text-[10px]'>{user.user_name}</p>
                                     <p className={`text-[10px] rounded-sm px-1 ${getRoleColor(user.type)}`}>{user.type}</p>
                                 </div>
                             </div>
-                            <input className={`w-4 h-4 border border-gray-500 rounded-sm appearance-none cursor-pointer relative ${user.checked ? "bg-yellow-400" : "bg-transparent"} checked:before:content-['✔'] checked:before:absolute checked:before:text-black checked:before:font-bold checked:before:left-[2px] checked:before:top-[-2px]`} type="checkbox" checked={user.checked} onChange={()=>handleChange(user.id)}/>
+                            <input className={`w-4 h-4 border border-gray-500 rounded-sm appearance-none cursor-pointer relative ${selectedId.includes(user.user_id) ? "bg-yellow-400" : "bg-transparent"} checked:before:content-['✔'] checked:before:absolute checked:before:text-black checked:before:font-bold checked:before:left-[2px] checked:before:top-[-2px]`} type="checkbox" checked={selectedId.includes(user.user_id)} onChange={()=>handleChange(user.user_id)}/>
                         </div>
                     ))}
                 </div>
@@ -291,9 +302,9 @@ const CreateTeam = ({setIsCreatePeopleOpen}) => {
             <div className='flex flex-wrap gap-[10px] '>
              {selectedMembers.map((item)=>(
                 <div key={item.id} className=' bg-[#0F2645]  flex space-x-1 border border-transparent rounded-md items-center '>
-                    <img className="w-6 h-6 border border-transparent rounded-tl-md rounded-bl-md" src={item.img}/>
-                    <p className='text-xs'>{item.name}</p>
-                    <IoClose onClick={()=> handleChange(item.id)}  className="cursor-pointer" size={24}/>
+                    <img className="w-6 h-6 border border-transparent rounded-tl-md rounded-bl-md" src={item.imagename}/>
+                    <p className='text-xs'>{item.user_name}</p>
+                    <IoClose onClick={()=> handleChange(item.user_id)}  className="cursor-pointer" size={24}/>
                 </div>
              ))}
             </div>

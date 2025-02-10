@@ -9,23 +9,21 @@ const Page = () => {
     const invites=useWorkfastStore((state)=>state.invites);
     const { isInviteOpen } = useWorkfastStore();
     const deleteInvite=useWorkfastStore((state)=>state.deleteInvite);
-
-    const[view, setView]=useState(false);
     const [activeTab, setActiveTab] = useState('pending');
     const[data, setData]=useState([]);
 
 
     const handleDelete=async(id)=>{
         try{
-        //   await deleteInvite(id);
-        //   await fetchInvites();
+           await deleteInvite(id);
+           await fetchInvites();
         }catch(err){
             console.log(err);
         }}
 
     useEffect(()=>{
     const fetchData=async()=>{
-        // await fetchInvites();
+         await fetchInvites();
     }
     fetchData();
     },[fetchInvites, isInviteOpen])

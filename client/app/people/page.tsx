@@ -36,7 +36,7 @@ const handleToggle=(type)=>{
 
 useEffect(()=>{
  const fetchData=async()=>{
-  // await fetchPeoples("");
+   await fetchPeoples("");
  }
  fetchData();
 },[fetchPeoples])
@@ -71,7 +71,7 @@ const fetchDataByQuery=async()=>{
 
 useEffect(() => {
   
-    // fetchDataByQuery(); // Trigger the fetch only when account or recommend is updated
+     fetchDataByQuery(); // Trigger the fetch only when account or recommend is updated
   
 }, [data.account, data.recommend, data.org]);
 

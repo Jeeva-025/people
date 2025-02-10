@@ -14,7 +14,7 @@ const UserChannel = sequelize.define('userChannel', {
     allowNull:false,
   },
   userId:{
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,
     allowNull:false,
   },
   channelId: {

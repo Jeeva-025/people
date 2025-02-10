@@ -51,6 +51,9 @@ const channel=require("./versions/v1/models/channelModel");
 const apiRouter=require("./versions/v1/router");
 const cors=require("cors");
 require("./versions/v1/models/association");
+const team=require("./versions/v1/models/teamModel");
+const UserTeam=require("./versions/v1/models/userTeamModel");
+
 dotenv.config();
 
 const app = express();

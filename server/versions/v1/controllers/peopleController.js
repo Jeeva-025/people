@@ -58,12 +58,13 @@ controller.getAllPeople = async (req, res) => {
 controller.insertPeople = async (req, res) => {
   try {
     const { user_name, email, mobile_number, designation, type } = req.body;
-
-   
     const data = await invite.findOne({ where: { email } });
-
+  
     if (!data) {
       return res.status(404).json({ message: "Invitation is not found"});
+    }
+    if(data.status==='inactive'){
+      return res.status(404).json({message:"Status is inactive"});
     }
 
     const now = new Date();
@@ -89,7 +90,7 @@ controller.insertPeople = async (req, res) => {
     data.status = "accept";
     await data.save();
 
-    // Create new user in 'people' table
+    //Create new user in 'people' table
     const people=await People.create({
       imagename: req.file.filename,
       user_name,
@@ -97,16 +98,20 @@ controller.insertPeople = async (req, res) => {
       mobile_number,
       designation,
       type,
+      
     });
 
-    // Fetch invitedBy and channelId from invite table
+    people.user_id=user_name+people.id;
+    await people.save();
+
+    //Fetch invitedBy and channelId from invite table
     const invitedById = data.invitedBy;
     const channelId = data.channelId;
 
     // Insert into userChannel table
     await userChannel.create({
       invitedById,
-      userId: people.id, 
+      userId: people.user_id, 
       channelId, 
      
     });

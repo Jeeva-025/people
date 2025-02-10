@@ -8,6 +8,10 @@ const People = sequelize.define("people", {
     allowNull: false,
     autoIncrement: true,
   },
+  user_id:{
+    type:DataTypes.STRING,
+    allowNull:true,
+  },
   imagename:{
     type:DataTypes.STRING,
     allowNull:false,

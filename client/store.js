@@ -7,9 +7,63 @@ const workfastStore=(set)=>({
    invites:[],
    isInviteOpen: false,
    teams:[],
+   teamMates:[],
 
-   addTeams:(value)=> set((state)=>({teams:[...state.teams, value]})),
+   
    setIsInviteOpen: (value) => set({ isInviteOpen: value }),
+
+   fetchTeams:async()=>{
+    try{
+       const response= await axios.get('http://localhost:8080/api/v1/team');
+       set({teams:response.data});
+    }catch(err){
+        console.log(err);
+        throw err
+    }
+   },
+   addTeams:async(team_name, members)=>{
+    try{
+        const response= await axios.post('http://localhost:8080/api/v1/team/create', {
+            team_name,
+            members
+        });
+        set((state) => ({ teams: [...state.teams, response.data] }));
+    }catch(err){
+        console.log(err);
+        throw err;
+    }
+   },
+   fetchByTeamNames:async(id)=>{
+    try{
+       
+        const response=await axios.get(`http://localhost:8080/api/v1/user/${id}`);
+        set({teamMates:response.data});
+        console.log(response);
+    }catch(err){
+        console.log(err)
+        throw err;
+    }
+   }, 
+   deleteUserFromTeam:async(user_ids, team_id)=>{
+    try{
+        const response=await axios.post('http://localhost:8080/api/v1/team/delete',{
+            user_ids,
+            team_id
+          } );
+    }catch(err){
+        console.log(err);
+        throw err;
+    }
+   }, 
+   deleteTeam:async(team_id)=>{
+    try{
+        const response=await axios.post("http://localhost:8080/api/v1/team/deleteteam", {team_id});
+        
+    }catch(err){
+        console.log(err);
+        throw err;
+    }
+   },
 
    fetchPeoples: async(str)=>{
     try{

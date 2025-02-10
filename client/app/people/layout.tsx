@@ -44,6 +44,7 @@ const layout = ({children}) => {
           { id:8, name: "Sandra", img: "https://plus.unsplash.com/premium_photo-1669879825881-6d4e4bde67d5?q=80&w=1372&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Customer", checked:false },
           { id:9, name: "Duke", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1364&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", type:"Customer", checked:false },
         ]);
+      const [teamId, setTeamId ]=useState();
 
         const menuRef=useRef(null);
         const deleteSpaceRef=useRef(null);
@@ -52,10 +53,14 @@ const layout = ({children}) => {
  const [contextMenu, setContextMenu] = useState({
       visible: false,
       x: 0,
-      y: 0, 
+      y: 0,
+      memberId:null, 
+      name:""
     });
     const [isDeleteSpacePopupOpen, setIsDeleteSpacePopupOpen]=useState(false);
     const { isInviteOpen, setIsInviteOpen } = useWorkfastStore();
+    const fetchTeams=useWorkfastStore((state)=> state.fetchTeams)
+    const deleteTeam=useWorkfastStore((state)=>state.deleteTeam);
     const teams= useWorkfastStore((state)=>state.teams)
 
     const [isCreatePeopleOpen , setIsCreatePeopleOpen ]=useState(false);
@@ -89,13 +94,15 @@ const layout = ({children}) => {
   const pathname = usePathname();
   
 
-  const handleMenuClick = (event) => {
+  const handleMenuClick = (event, team) => {
     event.preventDefault();
     const rect = event.currentTarget.getBoundingClientRect();
     setContextMenu({
       visible: true,
       x: rect.right + 15,
       y: rect.top + rect.height / 2-40 ,
+      memberId:team.team_id,
+      name:team.team_name
      
     });
   };
@@ -123,6 +130,24 @@ const layout = ({children}) => {
       };
     }, [contextMenu]);
 
+    useEffect(()=>{
+      const fetchData=async()=>{
+        await fetchTeams();
+      }
+      fetchData();
+    },[fetchTeams])
+
+    const handleDelete=async(id)=>{
+      console.log("hellow all")
+      try{
+       await deleteTeam(id);
+       await fetchTeams();
+       setIsDeleteSpacePopupOpen(false);
+      }catch(err){
+        console.log(err);
+      }
+    }
+
   return (
     <>
     <div className='flex justify-center items-stretch p-1  max-h-screen '>
@@ -147,17 +172,19 @@ const layout = ({children}) => {
 
                      {teams && teams.length>0 && (
                       <div className='flex flex-col space-y-1 w-full'>
-                          { teams.map((item, index)=>(
-                              <div key={index} className='flex flex-row justify-between items-center bg-[#0095FF] border border-transparent w-full'>
+                          { teams.map((item, index)=>(  
+                             item.deactivateddate===null && <div key={item.id} className='flex flex-row justify-between items-center bg-[#0095FF] border border-transparent w-full'>
                               <div className='flex flex-row space-x-2 items-center py-1 pl-3 pr-2'>
                               {iconMapping[item.IconName] ? (
                                     React.createElement(iconMapping[item.IconName], {className: ' border border-white px-1 rounded-lg cursor-pointer  text-[#FFDD09]  text-white rounded-lg',
                                       size:24,})) : (
                                     <FaHome className="border border-white px-1 rounded-lg cursor-pointer text-white " size={24} /> 
                                   )}
-                              <p className='text-xs'>{item.teamName}</p>
+                              <p className='text-xs'>{item.team_name}</p>
                               </div>
-                              <IoEllipsisVertical onClick={(event)=>handleMenuClick(event)} className='cursor-pointer'/>
+                              <IoEllipsisVertical onClick={(event)=>{
+                                handleMenuClick(event, item)
+                                setTeamId(item.team_id) }} className='cursor-pointer'/>
                             
                               </div>
                             ))}
@@ -222,19 +249,19 @@ const layout = ({children}) => {
       </div>}
      
       {isSelectTeamPopupOpen && <div ref={selectTeam} className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[69]"> 
-        <EditTeam setIsSelectTeamPopupOpen={setIsSelectTeamPopupOpen} members={members} setMembers={setMembers}/>
+        <EditTeam setIsSelectTeamPopupOpen={setIsSelectTeamPopupOpen} teamId={teamId}  />
       </div>}
 
 
        
       {isDeleteSpacePopupOpen && <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[69]">
        <div ref={deleteSpaceRef} className='bg-[#121825] flex flex-col justify-start items-center space-y-4 pt-4 border border-transparent rounded-lg w-[320px] '>
-       <h1 className='text-xs'>Delete <span className='text-[#FFDD09]'>AI Enthusiast?</span></h1>
-            <p className='text-[13px] font-thin text-center px-5'>Are you sure want to delete  the <span className='text-[#FFDD09]'>AI Enthusiast? </span>?</p>
+       <h1 className='text-xs'>Delete <span className='text-[#FFDD09]'>{contextMenu.name} ?</span></h1>
+            <p className='text-[13px] font-thin text-center px-5'>Are you sure want to delete  the <span className='text-[#FFDD09]'>{contextMenu.name} </span>?</p>
            
             <div className='flex justify-between items-center border-t border-[#3D3F46] w-full'>
               <button className='flex-1 text-[#0A84FF] text-xs py-2' onClick={() => setIsDeleteSpacePopupOpen(false)}>Cancel</button>
-              <button className='py-2 flex-1 text-[#FF3B30] text-xs border-l border-[#3D3F46]'>Delete</button>
+              <button onClick={()=> handleDelete(contextMenu.memberId)} className='py-2 flex-1 text-[#FF3B30] text-xs border-l border-[#3D3F46]'>Delete</button>
        </div>
       </div>
       </div>}

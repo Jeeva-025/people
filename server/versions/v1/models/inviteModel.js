@@ -18,7 +18,7 @@ const Invite = sequelize.define('Invite', {
     },
   },
   invitedBy:{
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull:false,
    
   },
