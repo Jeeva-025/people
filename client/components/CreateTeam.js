@@ -16,6 +16,7 @@ import { MdGroups } from "react-icons/md";
 import { FiHash } from "react-icons/fi";
 import { FaCheck } from "react-icons/fa6";
 import useWorkfastStore  from "../store.js"
+import TeamIcon from "../public/Group 2147223776.svg";
  
 
 
@@ -164,7 +165,7 @@ const CreateTeam = ({setIsCreatePeopleOpen}) => {
     
     <div className="bg-[#121825] flex flex-col justify-start items-start space-y-3 py-4 px-4 border border-gray-600 rounded-lg min-w-md w-[450px] max-h-[80vh] overflow-y-auto scrollbar-custom">
         <div className='flex flex-col space-y-4 items-start justify-center w-full'>
-        {!isDropDownOpen && <div className='w-full flex justify-between items-center'>
+        { <div className='w-full flex justify-between items-center'>
         <p className="text-white text-sm text-left ">Create Team</p>
         <IoClose onClick={()=>setIsCreatePeopleOpen(false)} className="cursor-pointer" size={24}/>
         </div>}
@@ -209,7 +210,7 @@ const CreateTeam = ({setIsCreatePeopleOpen}) => {
 
         { !isDropDownOpen && <div className='w-full flex flex-col justify-center items-start space-y-2'>
             <div className='flex space-x-1 items-center'>
-            <div className="w-6 h-6 flex items-center justify-center rounded-md px-1 bg-[#0A4F26] text-[#31D843]"><FaPeopleGroup size={40}/></div>
+            <div className="w-6 h-6 flex items-center justify-center rounded-md px-1 bg-[#0A4F26] text-[#31D843]"><img src='/Group 2147223776.svg' className="w-4 h-4"/></div>
             <p className='text-xs'>Team Name</p>   
             </div>
             <input value={data.team_name} onChange={(e)=>setData((prev)=>({...prev, team_name:e.target.value}))} className='bg-gray-800 text-xs px-2 py-2 border border-gray-600 rounded-md w-full' type="text" placeholder="Enter team name (e.g, AI Enthusiast)" />
@@ -217,7 +218,7 @@ const CreateTeam = ({setIsCreatePeopleOpen}) => {
 
         <div className='w-full flex flex-col justify-center items-start space-y-2'>
             <div className='flex space-x-1 items-center'>
-            <div className="w-6 h-6 flex items-center px-1 justify-center rounded-lg bg-[#0A233D] text-[#3DA9FC]"><IoIosSearch/></div>
+            <div className="w-6 h-6 flex items-center px-1 justify-center rounded-lg bg-[#18364C] text-[#32ADE6]"><IoIosSearch/></div>
             <p className='text-xs'>Search Members</p>   
             </div>
             <input onClick={()=>setIsDropDownOpen(true)} className='bg-gray-800 text-xs px-2 py-2 border border-gray-600 rounded-md w-full' type="text" placeholder="Enter team name (e.g, AI Enthusiast)" />
@@ -232,14 +233,14 @@ const CreateTeam = ({setIsCreatePeopleOpen}) => {
             <div className="flex gap-3 bg-transparent ">
                 {peoples && peoples.map((user, index) => (
                     <div key={index} onClick={()=>handleChange(user.user_id)} className=" cursor-pointer relative flex flex-col items-center">
-                    {/* Profile Image */}
+                    
                     <div className="w-6 h-6 rounded-md relative">
                         <img
                         src={user.imagename}
                         alt={user.user_name}
                         className="w-full h-full object-cover rounded-md"
                         />
-                        {/* Plus Icon */}
+                        
                         <div className={`absolute -top-1.5 -right-1.5  w-3 h-3 flex items-center justify-center rounded-full border border-[#0D1117] shadow-md ${selectedId.includes(user.user_id)?"bg-green-500" : "bg-yellow-400"}`}>
                         {selectedId.includes(user.user_id) ? (
                             <FaCheck size={5} className="text-white" />
@@ -248,7 +249,7 @@ const CreateTeam = ({setIsCreatePeopleOpen}) => {
                             )}
                         </div>
                     </div>
-                    {/* Name */}
+                    
                     <span className="text-white text-[10px] mt-1">{user.user_name}</span>
                     </div>
                 ))}
